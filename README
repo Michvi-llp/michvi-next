@@ -1,0 +1,15 @@
+# Michvi — Digital Governance Advisory Platform
+
+Independent governance advisory focused on signal integrity, identity continuity, consent architecture, and structural accountability across analytics and AI-driven systems.
+
+## Stack
+- Next.js (App Router)
+- TypeScript
+- Custom dataLayer (governance-first)
+
+## Deployment
+- Vercel (staging + production)
+
+## Note
+This repository contains public-facing architecture only.  
+Core governance logic and analytical frameworks are not exposed.
