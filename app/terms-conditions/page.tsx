@@ -18,6 +18,10 @@ export const metadata: Metadata = {
       "Terms governing use of Michvi LLP website and advisory services.",
     url: "https://michvi.com/terms/",
   },
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 /* ========================= */
