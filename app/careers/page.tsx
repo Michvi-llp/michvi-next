@@ -102,7 +102,7 @@ export default function CareersPage() {
       >
         {JSON.stringify({
           "@context": "https://schema.org",
-          "@type": "ContactPage",
+          "@type": "WebPage",
           name: "Careers | Michvi LLP",
           description:
             "Career submission page for governance advisory and research roles.",
