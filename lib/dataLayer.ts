@@ -1,14 +1,19 @@
 // ─────────────────────────────────────────────
-// michvi dataLayer — v2.2.0 (CONSENT FIXED)
+// michvi dataLayer — v2.3.0 (CONSENT STABLE)
 // ─────────────────────────────────────────────
 
-export type ConsentState = 'granted' | 'denied';
+export type ConsentState = "granted" | "denied";
+
+export type ConsentDetail = {
+  analytics: boolean;
+  ads: boolean;
+};
 
 export interface MichviData {
   page_type: string;
   page_category: string;
-  platform: 'nextjs';
-  device_type: 'mobile' | 'desktop';
+  platform: "nextjs";
+  device_type: "mobile" | "desktop";
   page_location: string;
   page_path: string;
   page_title: string;
@@ -16,7 +21,7 @@ export interface MichviData {
   traffic_source: string;
   consent_status: ConsentState;
   page_load_type: string;
-  script_version: 'v2.2.0';
+  script_version: "v2.3.0";
 }
 
 export interface DataLayerEvent {
@@ -25,8 +30,9 @@ export interface DataLayerEvent {
 }
 
 /* ───────────────── INIT ───────────────── */
+
 export function initDataLayer(): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
   window.dataLayer = window.dataLayer || [];
   window.__eventQueue = window.__eventQueue || [];
@@ -34,69 +40,88 @@ export function initDataLayer(): void {
   window.__lastConsentState = window.__lastConsentState || null;
   window.__pageViewFired = window.__pageViewFired || false;
 
-  // ✅ Proper GTAG binding
   window.gtag = function () {
     window.dataLayer.push(arguments);
   };
 
-  // 🔥 Default deny (critical)
-  window.gtag('consent', 'default', {
-    analytics_storage: 'denied',
-    ad_storage: 'denied',
+  window.gtag("consent", "default", {
+    analytics_storage: "denied",
+    ad_storage: "denied",
   });
 }
 
 /* ───────────────── CONSENT ───────────────── */
+
 export function getConsentState(): ConsentState {
-  if (typeof window === 'undefined') return 'denied';
+  if (typeof window === "undefined") return "denied";
 
   try {
-    const stored = localStorage.getItem('michvi_consent');
-    return stored === 'granted' ? 'granted' : 'denied';
+    const stored = localStorage.getItem("michvi_consent");
+    return stored === "granted" ? "granted" : "denied";
   } catch {
-    return 'denied';
+    return "denied";
+  }
+}
+
+function getConsentDetail(): ConsentDetail {
+  if (typeof window === "undefined") {
+    return { analytics: false, ads: false };
+  }
+
+  try {
+    const stored = localStorage.getItem("michvi_consent_detail");
+    if (!stored) return { analytics: false, ads: false };
+
+    const parsed = JSON.parse(stored) as Partial<ConsentDetail>;
+
+    return {
+      analytics: parsed.analytics === true,
+      ads: parsed.ads === true,
+    };
+  } catch {
+    return { analytics: false, ads: false };
   }
 }
 
 export function setConsentState(state: ConsentState): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
   try {
-    localStorage.setItem('michvi_consent', state);
+    localStorage.setItem("michvi_consent", state);
   } catch {}
 
-  // 🔹 granular consent
-  let parsed = { analytics: false, ads: false };
-
-  try {
-    const storedDetail = localStorage.getItem('michvi_consent_detail');
-    if (storedDetail) parsed = JSON.parse(storedDetail);
-  } catch {}
+  const detail = getConsentDetail();
 
   window.__lastConsentState = state;
   window.dataLayer = window.dataLayer || [];
 
-  // 🔥 Consent update (Google layer)
-  window.gtag('consent', 'update', {
-    analytics_storage: parsed.analytics ? 'granted' : 'denied',
-    ad_storage: parsed.ads ? 'granted' : 'denied',
+  if (!window.gtag) {
+    window.gtag = function () {
+      window.dataLayer.push(arguments);
+    };
+  }
+
+  window.gtag("consent", "update", {
+    analytics_storage: detail.analytics ? "granted" : "denied",
+    ad_storage: detail.ads ? "granted" : "denied",
   });
 
-  // ✅ DSG visibility event (correct)
   window.dataLayer.push({
-    event: 'consent_update',
+    event: "consent_update",
     consent_state: state,
+    analytics_storage: detail.analytics ? "granted" : "denied",
+    ad_storage: detail.ads ? "granted" : "denied",
   });
 
-  // 🔹 Queue control
-  if (state === 'granted') {
+  if (state === "granted") {
     flushQueue();
 
     window.dataLayer.push({
-      event: 'consent_granted',
+      event: "consent_granted",
+      analytics_storage: detail.analytics ? "granted" : "denied",
+      ad_storage: detail.ads ? "granted" : "denied",
     });
 
-    // 🔥 ONLY ONE page_view (correct place)
     if (!window.__pageViewFired) {
       window.__pageViewFired = true;
 
@@ -106,20 +131,19 @@ export function setConsentState(state: ConsentState): void {
       );
 
       window.dataLayer.push({
-        event: 'page_view',
+        event: "page_view",
         ...data,
-
-        // 🔥 GTM SIGNAL (ONLY HERE)
-        ad_storage: parsed.ads ? 'granted' : 'denied',
-        analytics_storage: parsed.analytics ? 'granted' : 'denied',
+        analytics_storage: detail.analytics ? "granted" : "denied",
+        ad_storage: detail.ads ? "granted" : "denied",
       });
     }
   }
 }
 
 /* ───────────────── EVENT QUEUE ───────────────── */
+
 function flushQueue(): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
   const queue = window.__eventQueue || [];
   window.__eventQueue = [];
@@ -130,26 +154,34 @@ function flushQueue(): void {
 }
 
 function pushEventDirect(evt: DataLayerEvent): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
   window.dataLayer = window.dataLayer || [];
-  window.dataLayer.push(evt);
+
+  const detail = getConsentDetail();
+
+  window.dataLayer.push({
+    ...evt,
+    consent_status: getConsentState(),
+    analytics_storage: detail.analytics ? "granted" : "denied",
+    ad_storage: detail.ads ? "granted" : "denied",
+  });
 
   window.__journey = window.__journey || [];
   window.__journey.push(evt.event);
 }
 
 export function pushEvent(evt: DataLayerEvent): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
-  if (evt.event === 'consent_update') {
+  const consent = getConsentState();
+
+  if (evt.event === "consent_update") {
     pushEventDirect(evt);
     return;
   }
 
-  const consent = getConsentState();
-
-  if (consent !== 'granted') {
+  if (consent !== "granted") {
     window.__eventQueue = window.__eventQueue || [];
     window.__eventQueue.push(evt);
     return;
@@ -159,68 +191,74 @@ export function pushEvent(evt: DataLayerEvent): void {
 }
 
 /* ───────────────── CONTEXT BUILDER ───────────────── */
+
 export function buildMichviData(
   pathname: string,
   title: string
 ): MichviData {
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return {
-      page_type: 'unknown',
-      page_category: 'unknown',
-      platform: 'nextjs',
-      device_type: 'desktop',
-      page_location: '',
+      page_type: "unknown",
+      page_category: "unknown",
+      platform: "nextjs",
+      device_type: "desktop",
+      page_location: "",
       page_path: pathname,
       page_title: title,
-      referrer: '',
-      traffic_source: 'direct',
-      consent_status: 'denied',
-      page_load_type: 'unknown',
-      script_version: 'v2.2.0',
+      referrer: "",
+      traffic_source: "direct",
+      consent_status: "denied",
+      page_load_type: "unknown",
+      script_version: "v2.3.0",
     };
   }
 
   const params = new URLSearchParams(window.location.search);
-  const utmSource = params.get('utm_source');
-  const trafficSource = utmSource || 'direct';
+  const trafficSource = params.get("utm_source") || "direct";
 
-  let loadType = 'unknown';
+  let loadType = "unknown";
+
   try {
-    const nav = performance.getEntriesByType('navigation') as any;
+    const nav = performance.getEntriesByType("navigation") as PerformanceNavigationTiming[];
     if (nav[0]) loadType = nav[0].type;
   } catch {}
 
   return {
     page_type: derivePageType(pathname),
     page_category: derivePageCategory(pathname),
-    platform: 'nextjs',
-    device_type: window.innerWidth < 768 ? 'mobile' : 'desktop',
+    platform: "nextjs",
+    device_type: window.innerWidth < 768 ? "mobile" : "desktop",
     page_location: window.location.href,
     page_path: pathname,
     page_title: title,
-    referrer: document.referrer || '',
+    referrer: document.referrer || "",
     traffic_source: trafficSource,
     consent_status: getConsentState(),
     page_load_type: loadType,
-    script_version: 'v2.2.0',
+    script_version: "v2.3.0",
   };
 }
 
 /* ───────────────── HELPERS ───────────────── */
+
 function derivePageType(pathname: string): string {
-  if (pathname === '/') return 'home';
-  if (pathname === '/request-assessment') return 'form';
-  if (pathname === '/contact') return 'contact';
-  return 'page';
+  if (pathname === "/") return "home";
+  if (pathname === "/request-assessment") return "form";
+  if (pathname === "/request-assessment/") return "form";
+  if (pathname === "/contact") return "contact";
+  if (pathname === "/contact/") return "contact";
+  return "page";
 }
 
 function derivePageCategory(pathname: string): string {
-  if (pathname === '/') return 'core';
-  if (pathname === '/request-assessment') return 'conversion';
-  return 'general';
+  if (pathname === "/") return "core";
+  if (pathname === "/request-assessment") return "conversion";
+  if (pathname === "/request-assessment/") return "conversion";
+  return "general";
 }
 
 /* ───────────────── GLOBAL TYPES ───────────────── */
+
 declare global {
   interface Window {
     dataLayer: DataLayerEvent[];
@@ -228,6 +266,6 @@ declare global {
     __journey: string[];
     __lastConsentState: ConsentState | null;
     __pageViewFired?: boolean;
-    gtag?: (...args: any[]) => void;
+    gtag?: (...args: unknown[]) => void;
   }
 }

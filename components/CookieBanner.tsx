@@ -16,6 +16,7 @@ export function ConsentBanner() {
     ads: false,
   });
 
+  /* ───────────────── INIT ───────────────── */
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -48,30 +49,30 @@ export function ConsentBanner() {
     }
   }, []);
 
-  // 🔥 ADD THIS (SECOND useEffect)
+  /* ───────────────── OPEN SETTINGS ───────────────── */
   useEffect(() => {
     function openBanner() {
       setVisible(true);
-      setCustomize(true); // direct open settings
+      setCustomize(true);
     }
 
     window.addEventListener("open-consent", openBanner);
-
-    return () => {
-      window.removeEventListener("open-consent", openBanner);
-    };
+    return () => window.removeEventListener("open-consent", openBanner);
   }, []);
 
+  /* ───────────────── CORE FIX ───────────────── */
   function apply(state: LocalConsent) {
-    const resolved = state.analytics || state.ads ? "granted" : "denied";
-
-    setConsentState(resolved);
-
+    // 🔥 STEP 1 — persist FIRST (CRITICAL)
     try {
       localStorage.setItem("consent_state", JSON.stringify(state));
       localStorage.setItem("michvi_consent_detail", JSON.stringify(state));
     } catch {}
-    
+
+    // 🔥 STEP 2 — resolve AFTER persistence
+    const resolved = state.analytics || state.ads ? "granted" : "denied";
+
+    // 🔥 STEP 3 — fire consent (correct data available)
+    setConsentState(resolved);
 
     setPrefs(state);
     setVisible(false);
@@ -96,7 +97,6 @@ export function ConsentBanner() {
     <div
       role="dialog"
       aria-modal="true"
-      
       style={{
         position: "fixed",
         bottom: 20,
@@ -121,11 +121,12 @@ export function ConsentBanner() {
       >
         {!customize && (
           <>
-            {/* HEADER */}
+            {/* 🔥 HEADER (UPGRADED COPY) */}
             <div style={{ marginBottom: "10px" }}>
               <h3 style={{ margin: 0, fontSize: "16px", fontWeight: 600 }}>
-                Privacy Preferences
+                Signal & Privacy Preferences
               </h3>
+
               <p
                 style={{
                   margin: "6px 0 0",
@@ -134,9 +135,8 @@ export function ConsentBanner() {
                   color: "rgba(255,255,255,0.75)",
                 }}
               >
-                Essential technologies run by default. Optional analytics (GA4)
-                and targeting (LinkedIn) help us understand usage and improve
-                governance insights.
+                Essential signals operate by default. Optional analytics and
+                communication signals activate only with your consent.
               </p>
             </div>
 
@@ -152,15 +152,15 @@ export function ConsentBanner() {
               {[
                 {
                   title: "Essential",
-                  desc: "Required for core functionality, security, and form handling.",
+                  desc: "Core functionality, security, and session continuity.",
                 },
                 {
                   title: "Analytics",
-                  desc: "Usage and engagement measurement (GA4).",
+                  desc: "Usage insights to improve structural clarity.",
                 },
                 {
-                  title: "Targeting",
-                  desc: "Limited advertising signals (LinkedIn).",
+                  title: "Communication",
+                  desc: "Limited outreach and engagement signals.",
                 },
               ].map((item) => (
                 <div
@@ -180,7 +180,6 @@ export function ConsentBanner() {
                       fontSize: "12px",
                       color: "rgba(255,255,255,0.7)",
                       marginTop: "3px",
-                      lineHeight: 1.5,
                     }}
                   >
                     {item.desc}
@@ -199,10 +198,7 @@ export function ConsentBanner() {
                 Reject Optional
               </button>
 
-              <button
-                onClick={() => setCustomize(true)}
-                style={ghostBtn}
-              >
+              <button onClick={() => setCustomize(true)} style={ghostBtn}>
                 Manage Preferences
               </button>
             </div>
@@ -212,7 +208,7 @@ export function ConsentBanner() {
         {customize && (
           <>
             <h3 style={{ margin: 0, fontSize: "16px" }}>
-              Manage Preferences
+              Manage Signal Preferences
             </h3>
 
             <div style={{ marginTop: "10px", display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -222,7 +218,7 @@ export function ConsentBanner() {
               </label>
 
               <label style={row}>
-                Analytics (GA4)
+                Analytics
                 <input
                   type="checkbox"
                   checked={prefs.analytics}
@@ -233,7 +229,7 @@ export function ConsentBanner() {
               </label>
 
               <label style={row}>
-                Targeting (LinkedIn)
+                Communication (LinkedIn)
                 <input
                   type="checkbox"
                   checked={prefs.ads}
@@ -246,7 +242,7 @@ export function ConsentBanner() {
 
             <div style={{ marginTop: "12px", display: "flex", gap: "8px" }}>
               <button onClick={savePrefs} style={primaryBtn}>
-                Save
+                Save Preferences
               </button>
 
               <button onClick={rejectAll} style={secondaryBtn}>
@@ -293,7 +289,6 @@ const ghostBtn: React.CSSProperties = {
   borderRadius: "8px",
   padding: "8px 14px",
   fontSize: "12px",
-  fontWeight: 500,
   border: "none",
   cursor: "pointer",
 };
