@@ -20,6 +20,12 @@ export const metadata: Metadata = {
       "Structured and confidential communication channel for leadership-level interaction.",
     url: "https://michvi.com/contact/",
   },
+
+  // Index/NoIndex
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 /* ========================= */
