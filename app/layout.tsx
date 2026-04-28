@@ -1,8 +1,3 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// app/layout.tsx
-// Michvi LLP — Root Layout  v2.2.2 (FINAL LOCKED)
-// ─────────────────────────────────────────────────────────────────────────────
-
 import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
@@ -12,8 +7,7 @@ import { Footer } from "@/components/Footer";
 import { ConsentBanner } from "@/components/CookieBanner";
 import { AnalyticsProvider } from "@/components/AnalyticsProvider";
 import { GTMLoader } from "@/components/GTMLoader";
-
-/* ─── SEO Metadata ─────────────────────────────────────────────────────────── */
+import { RouteChangeTracker } from "@/components/RouteChangeTracker";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://michvi.com"),
@@ -62,8 +56,6 @@ export const metadata: Metadata = {
   },
 };
 
-/* ─── Root Layout ──────────────────────────────────────────────────────────── */
-
 export default function RootLayout({
   children,
 }: {
@@ -72,7 +64,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* 🔥 CONSENT DEFAULT — ALWAYS DENIED */}
         <Script id="consent-default" strategy="beforeInteractive">
           {`
             window.dataLayer = window.dataLayer || [];
@@ -86,65 +77,60 @@ export default function RootLayout({
           `}
         </Script>
 
-        {/* 🔹 SAFE GLOBAL INIT */}
-        <Script id="dl-init" strategy="beforeInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            window.michvi = window.michvi || {};
-          `}
-        </Script>
-
-        {/* 🔹 SESSION INIT (EARLY) */}
         <Script id="session-init" strategy="beforeInteractive">
           {`
             (function(){
               try {
+                window.michvi = window.michvi || {};
+
                 var s = sessionStorage.getItem("michvi_session");
                 if (!s) {
                   s = "sess_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6);
                   sessionStorage.setItem("michvi_session", s);
                 }
+
                 window.michvi.session = s;
               } catch(e) {}
             })();
           `}
         </Script>
 
-        {/* 🔹 ORG SCHEMA */}
+        <Script id="consent-open-helper" strategy="beforeInteractive">
+          {`
+            window.openConsentManager = function () {
+              window.dispatchEvent(new Event('open-consent'));
+            };
+          `}
+        </Script>
+
         <Script
           id="org-schema"
           type="application/ld+json"
           strategy="afterInteractive"
         >
-          {`
-            {
-              "@context": "https://schema.org",
-              "@type": "Organization",
-              "name": "Michvi LLP",
-              "url": "https://michvi.com",
-              "email": "advisory@michvi.com",
-              "address": {
-                "@type": "PostalAddress",
-                "addressCountry": "IN"
-              }
-            }
-          `}
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            name: "Michvi LLP",
+            url: "https://michvi.com",
+            email: "advisory@michvi.com",
+            address: {
+              "@type": "PostalAddress",
+              addressCountry: "IN",
+            },
+          })}
         </Script>
       </head>
 
       <body>
-        {/* 🔥 GTM LOAD */}
         <GTMLoader />
-
-        {/* 🔥 SIGNAL ENGINE */}
         <AnalyticsProvider />
+        <RouteChangeTracker />
 
-        {/* UI */}
         <Header />
         <main className="page-main">{children}</main>
         <Footer />
 
-        {/* 🔥 CONSENT LAYER */}
         <ConsentBanner />
       </body>
     </html>

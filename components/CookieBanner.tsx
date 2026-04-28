@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { setConsentState, getConsentState } from "@/lib/dataLayer";
 
 type LocalConsent = {
@@ -8,7 +8,56 @@ type LocalConsent = {
   ads: boolean;
 };
 
-export function ConsentBanner() {
+const DETAIL_KEY = "michvi_consent_detail";
+const CORE_KEY = "michvi_consent";
+
+/* ───────── SAFE READ ───────── */
+function readDetail(): LocalConsent | null {
+  try {
+    const raw = localStorage.getItem(DETAIL_KEY);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw) as Partial<LocalConsent>;
+
+    if (
+      typeof parsed.analytics !== "boolean" ||
+      typeof parsed.ads !== "boolean"
+    ) {
+      return null;
+    }
+
+    return {
+      analytics: parsed.analytics,
+      ads: parsed.ads,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function readCore(): "granted" | "denied" | null {
+  try {
+    const raw = localStorage.getItem(CORE_KEY);
+    if (raw === "granted" || raw === "denied") return raw;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function isStorageHealthy(): boolean {
+  try {
+    const probe = "__consent_probe__";
+    localStorage.setItem(probe, "1");
+    localStorage.removeItem(probe);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/* ───────── COMPONENT ───────── */
+export function ConsentBanner({ logo }: { logo?: ReactNode }) {
   const [visible, setVisible] = useState(false);
   const [customize, setCustomize] = useState(false);
   const [prefs, setPrefs] = useState<LocalConsent>({
@@ -16,40 +65,32 @@ export function ConsentBanner() {
     ads: false,
   });
 
-  /* ───────────────── INIT ───────────────── */
+  /* ───────── INIT ───────── */
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const consentState = getConsentState();
-
-    try {
-      const storedUi = localStorage.getItem("consent_state");
-      if (storedUi) {
-        const parsed = JSON.parse(storedUi) as Partial<LocalConsent>;
-        setPrefs({
-          analytics: !!parsed.analytics,
-          ads: !!parsed.ads,
-        });
-      }
-    } catch {}
-
-    try {
-      const storedCore = localStorage.getItem("michvi_consent");
-      if (!storedCore) {
-        setVisible(true);
-        return;
-      }
-    } catch {
+    if (!isStorageHealthy()) {
       setVisible(true);
       return;
     }
 
-    if (consentState === "granted" || consentState === "denied") {
-      setVisible(false);
+    const core = readCore();
+    const detail = readDetail();
+
+    if (detail) {
+      setPrefs(detail);
     }
+
+    // 🔥 FINAL LOGIC
+    if (!core || !detail) {
+      setVisible(true);
+      return;
+    }
+
+    setVisible(false);
   }, []);
 
-  /* ───────────────── OPEN SETTINGS ───────────────── */
+  /* ───────── OPEN FROM FOOTER ───────── */
   useEffect(() => {
     function openBanner() {
       setVisible(true);
@@ -60,18 +101,38 @@ export function ConsentBanner() {
     return () => window.removeEventListener("open-consent", openBanner);
   }, []);
 
-  /* ───────────────── CORE FIX ───────────────── */
+  /* ───────── CROSS TAB SYNC ───────── */
+  useEffect(() => {
+    function syncConsent() {
+      const detail = readDetail();
+      const core = readCore();
+
+      if (detail) setPrefs(detail);
+
+      if (!core || !detail) {
+        setVisible(true);
+      } else {
+        setVisible(false);
+      }
+    }
+
+    window.addEventListener("storage", syncConsent);
+
+    return () => {
+      window.removeEventListener("storage", syncConsent);
+    };
+  }, []);
+
+  /* ───────── APPLY ───────── */
   function apply(state: LocalConsent) {
-    // 🔥 STEP 1 — persist FIRST (CRITICAL)
+    const resolved: "granted" | "denied" =
+      state.analytics || state.ads ? "granted" : "denied";
+
     try {
-      localStorage.setItem("consent_state", JSON.stringify(state));
-      localStorage.setItem("michvi_consent_detail", JSON.stringify(state));
+      localStorage.setItem(DETAIL_KEY, JSON.stringify(state));
+      localStorage.setItem(CORE_KEY, resolved);
     } catch {}
 
-    // 🔥 STEP 2 — resolve AFTER persistence
-    const resolved = state.analytics || state.ads ? "granted" : "denied";
-
-    // 🔥 STEP 3 — fire consent (correct data available)
     setConsentState(resolved);
 
     setPrefs(state);
@@ -97,99 +158,34 @@ export function ConsentBanner() {
     <div
       role="dialog"
       aria-modal="true"
-      style={{
-        position: "fixed",
-        bottom: 20,
-        left: 20,
-        right: 20,
-        zIndex: 9999,
-        display: "flex",
-        justifyContent: "center",
-      }}
+      aria-labelledby="consent-title"
+      style={shellOuter}
     >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "920px",
-          background: "#0f172a",
-          color: "#fff",
-          borderRadius: "14px",
-          border: "1px solid rgba(255,255,255,0.08)",
-          boxShadow: "0 16px 32px rgba(0,0,0,0.25)",
-          padding: "18px 20px",
-        }}
-      >
+      <div style={shellInner}>
+        <header style={headerRow}>
+          {logo && <div style={logoSlot}>{logo}</div>}
+
+          <div style={{ flex: 1 }}>
+            <h3 id="consent-title" style={titleStyle}>
+              Privacy & Signal Control
+            </h3>
+
+            <p style={subtitleStyle}>
+              Essential signals operate by default. Analytics and communication
+              signals activate only with your consent.
+            </p>
+          </div>
+        </header>
+
         {!customize && (
           <>
-            {/* 🔥 HEADER (UPGRADED COPY) */}
-            <div style={{ marginBottom: "10px" }}>
-              <h3 style={{ margin: 0, fontSize: "16px", fontWeight: 600 }}>
-                Signal & Privacy Preferences
-              </h3>
-
-              <p
-                style={{
-                  margin: "6px 0 0",
-                  fontSize: "13px",
-                  lineHeight: 1.6,
-                  color: "rgba(255,255,255,0.75)",
-                }}
-              >
-                Essential signals operate by default. Optional analytics and
-                communication signals activate only with your consent.
-              </p>
+            <div style={cardGrid}>
+              <Card title="Essential" desc="Core functionality and security." />
+              <Card title="Analytics" desc="Usage insights." />
+              <Card title="Communication" desc="LinkedIn signals." />
             </div>
 
-            {/* CARDS */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))",
-                gap: "10px",
-                marginBottom: "12px",
-              }}
-            >
-              {[
-                {
-                  title: "Essential",
-                  desc: "Core functionality, security, and session continuity.",
-                },
-                {
-                  title: "Analytics",
-                  desc: "Usage insights to improve structural clarity.",
-                },
-                {
-                  title: "Communication",
-                  desc: "Limited outreach and engagement signals.",
-                },
-              ].map((item) => (
-                <div
-                  key={item.title}
-                  style={{
-                    padding: "10px",
-                    borderRadius: "10px",
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.06)",
-                  }}
-                >
-                  <div style={{ fontSize: "13px", fontWeight: 600 }}>
-                    {item.title}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      color: "rgba(255,255,255,0.7)",
-                      marginTop: "3px",
-                    }}
-                  >
-                    {item.desc}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* BUTTONS */}
-            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+            <div style={btnRow}>
               <button onClick={acceptAll} style={primaryBtn}>
                 Accept All
               </button>
@@ -207,40 +203,25 @@ export function ConsentBanner() {
 
         {customize && (
           <>
-            <h3 style={{ margin: 0, fontSize: "16px" }}>
-              Manage Signal Preferences
-            </h3>
-
-            <div style={{ marginTop: "10px", display: "flex", flexDirection: "column", gap: "8px" }}>
-              <label style={row}>
-                Essential (always active)
-                <input type="checkbox" checked readOnly disabled />
-              </label>
-
-              <label style={row}>
-                Analytics
-                <input
-                  type="checkbox"
-                  checked={prefs.analytics}
-                  onChange={(e) =>
-                    setPrefs((p) => ({ ...p, analytics: e.target.checked }))
-                  }
-                />
-              </label>
-
-              <label style={row}>
-                Communication (LinkedIn)
-                <input
-                  type="checkbox"
-                  checked={prefs.ads}
-                  onChange={(e) =>
-                    setPrefs((p) => ({ ...p, ads: e.target.checked }))
-                  }
-                />
-              </label>
+            <div style={prefsList}>
+              <Toggle label="Essential" checked disabled />
+              <Toggle
+                label="Analytics"
+                checked={prefs.analytics}
+                onChange={(v) =>
+                  setPrefs((p) => ({ ...p, analytics: v }))
+                }
+              />
+              <Toggle
+                label="Communication (LinkedIn)"
+                checked={prefs.ads}
+                onChange={(v) =>
+                  setPrefs((p) => ({ ...p, ads: v }))
+                }
+              />
             </div>
 
-            <div style={{ marginTop: "12px", display: "flex", gap: "8px" }}>
+            <div style={btnRow}>
               <button onClick={savePrefs} style={primaryBtn}>
                 Save Preferences
               </button>
@@ -260,44 +241,36 @@ export function ConsentBanner() {
   );
 }
 
-/* BUTTONS */
-const primaryBtn: React.CSSProperties = {
-  background: "#fff",
-  color: "#0f172a",
-  borderRadius: "8px",
-  padding: "8px 14px",
-  fontSize: "12px",
-  fontWeight: 600,
-  border: "none",
-  cursor: "pointer",
-};
+/* ───────── SMALL COMPONENTS ───────── */
+function Card({ title, desc }: { title: string; desc: string }) {
+  return (
+    <div style={card}>
+      <div style={cardTitle}>{title}</div>
+      <div style={cardDesc}>{desc}</div>
+    </div>
+  );
+}
 
-const secondaryBtn: React.CSSProperties = {
-  background: "transparent",
-  color: "#fff",
-  border: "1px solid rgba(255,255,255,0.25)",
-  borderRadius: "8px",
-  padding: "8px 14px",
-  fontSize: "12px",
-  fontWeight: 600,
-  cursor: "pointer",
-};
-
-const ghostBtn: React.CSSProperties = {
-  background: "rgba(255,255,255,0.05)",
-  color: "#fff",
-  borderRadius: "8px",
-  padding: "8px 14px",
-  fontSize: "12px",
-  border: "none",
-  cursor: "pointer",
-};
-
-const row: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "space-between",
-  fontSize: "13px",
-  background: "rgba(255,255,255,0.04)",
-  padding: "8px 10px",
-  borderRadius: "8px",
-};
+function Toggle({
+  label,
+  checked,
+  disabled,
+  onChange,
+}: {
+  label: string;
+  checked: boolean;
+  disabled?: boolean;
+  onChange?: (v: boolean) => void;
+}) {
+  return (
+    <label style={row}>
+      <span>{label}</span>
+      <input
+        type="checkbox"
+        checked={checked}
+        disabled={disabled}
+        onChange={(e) => onChange?.(e.target.checked)}
+      />
+    </label>
+  );
+}

@@ -2,92 +2,99 @@
 
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import {
-  initDataLayer,
-  buildMichviData,
-  pushEvent,
-  getConsentState,
-} from "@/lib/dataLayer";
+import { buildMichviData, pushEvent, getConsentState } from "@/lib/dataLayer";
 
-/* ================= DEDUP STATE ================= */
-let lastEvent = { path: "", time: 0 };
 const SCROLL_MARKS = [25, 50, 75, 90];
-
-declare global {
-  interface Window {
-    __pageViewFired?: boolean;
-  }
-}
 
 export function AnalyticsProvider() {
   const pathname = usePathname();
 
+  const lastPageViewRef = useRef<{ path: string; time: number }>({
+    path: "",
+    time: 0,
+  });
+
   const scrollMarksRef = useRef<number[]>([]);
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const exitFiredRef = useRef(false);
+  const rafRef = useRef<number | null>(null);
 
-  /* ================= INIT ================= */
-  useEffect(() => {
-    initDataLayer();
-  }, []);
+  function getContext(path: string) {
+    const title = typeof document !== "undefined" ? document.title : "";
+    return buildMichviData(path, title);
+  }
+
+  function hasConsent() {
+    return getConsentState() === "granted";
+  }
+
+  function clearTimers() {
+    timersRef.current.forEach(clearTimeout);
+    timersRef.current = [];
+  }
 
   /* ================= PAGE VIEW ================= */
   useEffect(() => {
     if (!pathname) return;
+    if (!hasConsent()) return;
 
-    // First page_view is already handled by dataLayer.ts after consent grant.
-    if (window.__pageViewFired) {
-      window.__pageViewFired = false;
-      return;
-    }
+    const timer = window.setTimeout(() => {
+      const now = Date.now();
 
-    if (getConsentState() !== "granted") return;
+      if (
+        lastPageViewRef.current.path === pathname &&
+        now - lastPageViewRef.current.time < 1200
+      ) {
+        return;
+      }
 
-    const now = Date.now();
-    if (lastEvent.path === pathname && now - lastEvent.time < 1200) return;
+      lastPageViewRef.current = { path: pathname, time: now };
+      window.__pageViewFired = true;
 
-    lastEvent = { path: pathname, time: now };
+      pushEvent({
+        event: "page_view",
+        ...getContext(pathname),
+      });
 
-    const title = typeof document !== "undefined" ? document.title : "";
-    const data = buildMichviData(pathname, title);
+      scrollMarksRef.current = [];
+      exitFiredRef.current = false;
+      clearTimers();
+    }, 0);
 
-    pushEvent({
-      event: "page_view",
-      ...data,
-    });
-
-    scrollMarksRef.current = [];
-    timersRef.current.forEach(clearTimeout);
-    timersRef.current = [];
+    return () => window.clearTimeout(timer);
   }, [pathname]);
 
   /* ================= CLICK ================= */
   useEffect(() => {
     function handleClick(e: MouseEvent) {
-      if (getConsentState() !== "granted") return;
+      if (!hasConsent()) return;
+      if (e.defaultPrevented || e.button !== 0) return;
 
       const target = e.target as HTMLElement | null;
-      const link = target?.closest("a");
-      if (!link) return;
-
-      const url = link.href || "";
-      if (!url) return;
+      const link = target?.closest("a") as HTMLAnchorElement | null;
+      if (!link?.href) return;
 
       const text =
         link.textContent?.trim() ||
         link.getAttribute("aria-label") ||
         "unknown";
 
-      const currentPath =
-        typeof window !== "undefined" ? window.location.pathname : pathname || "";
-      const title = typeof document !== "undefined" ? document.title : "";
-      const context = buildMichviData(currentPath, title);
+      const currentPath = window.location.pathname;
+      const context = getContext(currentPath);
 
-      if (url.includes("/request-assessment")) {
+      let linkUrl: URL;
+      try {
+        linkUrl = new URL(link.href);
+      } catch {
+        return;
+      }
+
+      if (linkUrl.pathname.includes("/request-assessment")) {
         pushEvent({
           event: "cta_click",
           ...context,
           cta_text: text,
-          destination_url: url,
+          destination_url: link.href,
         });
         return;
       }
@@ -97,7 +104,7 @@ export function AnalyticsProvider() {
           event: "nav_click",
           ...context,
           nav_text: text,
-          nav_url: url,
+          nav_url: link.href,
         });
         return;
       }
@@ -107,19 +114,16 @@ export function AnalyticsProvider() {
           event: "footer_click",
           ...context,
           link_text: text,
-          link_url: url,
+          link_url: link.href,
         });
         return;
       }
 
-      const hostname =
-        typeof window !== "undefined" ? window.location.hostname : "";
-
-      if (hostname && !url.includes(hostname)) {
+      if (linkUrl.origin !== window.location.origin) {
         pushEvent({
           event: "outbound_click",
           ...context,
-          outbound_url: url,
+          outbound_url: link.href,
           link_text: text,
         });
         return;
@@ -129,7 +133,7 @@ export function AnalyticsProvider() {
         event: "internal_link_click",
         ...context,
         link_text: text,
-        link_url: url,
+        link_url: link.href,
       });
     }
 
@@ -152,13 +156,14 @@ export function AnalyticsProvider() {
       return (scrollTop / total) * 100;
     }
 
-    function handleScroll() {
-      if (getConsentState() !== "granted") return;
+    function processScroll() {
+      rafRef.current = null;
+
+      if (!hasConsent()) return;
       if (document.visibilityState !== "visible") return;
 
       const percent = getScrollPercent();
-      const title = typeof document !== "undefined" ? document.title : "";
-      const context = buildMichviData(pathname || "", title);
+      const context = getContext(pathname);
 
       SCROLL_MARKS.forEach((mark) => {
         if (percent >= mark && !scrollMarksRef.current.includes(mark)) {
@@ -173,42 +178,78 @@ export function AnalyticsProvider() {
       });
     }
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
+    function handleScroll() {
+      if (rafRef.current !== null) return;
+      rafRef.current = window.requestAnimationFrame(processScroll);
+    }
 
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (rafRef.current !== null) {
+        window.cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+    };
   }, [pathname]);
 
   /* ================= ENGAGEMENT ================= */
   useEffect(() => {
-    timersRef.current.forEach(clearTimeout);
-    timersRef.current = [];
+    if (!pathname) return;
 
-    function fire(delay: number, eventName: string) {
+    clearTimers();
+
+    function schedule(delay: number, eventName: string) {
       const timer = setTimeout(() => {
-        if (
-          getConsentState() === "granted" &&
-          document.visibilityState === "visible"
-        ) {
-          const title = typeof document !== "undefined" ? document.title : "";
-          const context = buildMichviData(pathname || "", title);
+        if (!hasConsent()) return;
+        if (document.visibilityState !== "visible") return;
 
-          pushEvent({
-            event: eventName,
-            ...context,
-          });
-        }
+        pushEvent({
+          event: eventName,
+          ...getContext(pathname),
+        });
       }, delay);
 
       timersRef.current.push(timer);
     }
 
-    fire(30000, "engaged_30s");
-    fire(60000, "engaged_60s");
+    schedule(30000, "engaged_30s");
+    schedule(60000, "engaged_60s");
+
+    return clearTimers;
+  }, [pathname]);
+
+  /* ================= PAGE EXIT ================= */
+  useEffect(() => {
+    if (!pathname) return;
+
+    exitFiredRef.current = false;
+
+    function fireExit() {
+      if (exitFiredRef.current) return;
+      if (!hasConsent()) return;
+
+      exitFiredRef.current = true;
+
+      pushEvent({
+        event: "page_exit",
+        ...getContext(pathname),
+      });
+    }
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === "hidden") {
+        fireExit();
+      }
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("pagehide", fireExit);
 
     return () => {
-      timersRef.current.forEach(clearTimeout);
-      timersRef.current = [];
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("pagehide", fireExit);
     };
   }, [pathname]);
 
