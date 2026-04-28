@@ -34,15 +34,13 @@ export function initDataLayer(): void {
   window.__lastConsentState = window.__lastConsentState || null;
   window.__pageViewFired = window.__pageViewFired || false;
 
-  // 🔥 ADD THIS BLOCK (CRITICAL)
-  const gtag =
-    window.gtag ||
-    function () {
-      window.dataLayer.push(arguments);
-    };
+  // ✅ FIXED
+  window.gtag = function () {
+    window.dataLayer.push(arguments);
+  };
 
-  // Default deny (before user interaction)
-  gtag('consent', 'default', {
+  // 🔥 Default deny
+  window.gtag('consent', 'default', {
     analytics_storage: 'denied',
     ad_storage: 'denied',
   });
