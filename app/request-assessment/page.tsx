@@ -21,6 +21,10 @@ export const metadata: Metadata = {
       "Confidential intake for independent governance evaluation across enterprise digital systems.",
     url: "https://michvi.com/request-assessment/",
   },
+  robots: {
+    index: false,
+    follow: false,
+  },  
 };
 
 /* ========================= */
