@@ -33,7 +33,21 @@ export function initDataLayer(): void {
   window.__journey = window.__journey || [];
   window.__lastConsentState = window.__lastConsentState || null;
   window.__pageViewFired = window.__pageViewFired || false;
+
+  // 🔥 ADD THIS BLOCK (CRITICAL)
+  const gtag =
+    window.gtag ||
+    function () {
+      window.dataLayer.push(arguments);
+    };
+
+  // Default deny (before user interaction)
+  gtag('consent', 'default', {
+    analytics_storage: 'denied',
+    ad_storage: 'denied',
+  });
 }
+
 
 /* ───────────────── CONSENT ───────────────── */
 export function getConsentState(): ConsentState {
@@ -47,36 +61,44 @@ export function getConsentState(): ConsentState {
   }
 }
 
-export function setConsentState(state: { analytics: boolean; ads: boolean }): void {
+export function setConsentState(state: ConsentState): void {
   if (typeof window === 'undefined') return;
 
   try {
-    localStorage.setItem('michvi_consent', JSON.stringify(state));
+    localStorage.setItem('michvi_consent', state);
+  } catch {}
+
+  // 🔹 Read granular consent
+  let parsed = { analytics: false, ads: false };
+
+  try {
+    const storedDetail = localStorage.getItem('michvi_consent_detail');
+    if (storedDetail) parsed = JSON.parse(storedDetail);
   } catch {}
 
   window.__lastConsentState = state;
-
   window.dataLayer = window.dataLayer || [];
 
-  // ✅ FIX 1: safe gtag binding (no duplicate definitions)
+  // ✅ Safe gtag
   const gtag =
     window.gtag ||
     function () {
       window.dataLayer.push(arguments);
     };
 
-  // 🔥 CONSENT UPDATE (CORE)
+  // 🔥 CRITICAL — Vendor-level control
   gtag('consent', 'update', {
-    analytics_storage: state.analytics ? 'granted' : 'denied',
-    ad_storage: state.ads ? 'granted' : 'denied',
+    analytics_storage: parsed.analytics ? 'granted' : 'denied',
+    ad_storage: parsed.ads ? 'granted' : 'denied',
   });
 
-  // DSG visibility event (keep)
+  // G event
   window.dataLayer.push({
     event: 'consent_update',
     consent_state: state,
   });
 
+  // 🔹 Core consent controls queue
   if (state === 'granted') {
     flushQueue();
 
@@ -84,7 +106,6 @@ export function setConsentState(state: { analytics: boolean; ads: boolean }): vo
       event: 'consent_granted',
     });
 
-    // ✅ FIX 2: prevent duplicate page_view
     if (!window.__pageViewFired) {
       window.__pageViewFired = true;
 
