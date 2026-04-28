@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// michvi dataLayer — v2.1.1 (FINAL STABLE)
+// michvi dataLayer — v2.2.0 (CONSENT FIXED)
 // ─────────────────────────────────────────────
 
 export type ConsentState = 'granted' | 'denied';
@@ -16,7 +16,7 @@ export interface MichviData {
   traffic_source: string;
   consent_status: ConsentState;
   page_load_type: string;
-  script_version: 'v2.1.1';
+  script_version: 'v2.2.0';
 }
 
 export interface DataLayerEvent {
@@ -34,18 +34,17 @@ export function initDataLayer(): void {
   window.__lastConsentState = window.__lastConsentState || null;
   window.__pageViewFired = window.__pageViewFired || false;
 
-  // ✅ FIXED
+  // ✅ Proper GTAG binding
   window.gtag = function () {
     window.dataLayer.push(arguments);
   };
 
-  // 🔥 Default deny
+  // 🔥 Default deny (critical)
   window.gtag('consent', 'default', {
     analytics_storage: 'denied',
     ad_storage: 'denied',
   });
 }
-
 
 /* ───────────────── CONSENT ───────────────── */
 export function getConsentState(): ConsentState {
@@ -66,7 +65,7 @@ export function setConsentState(state: ConsentState): void {
     localStorage.setItem('michvi_consent', state);
   } catch {}
 
-  // 🔹 Read granular consent
+  // 🔹 granular consent
   let parsed = { analytics: false, ads: false };
 
   try {
@@ -77,26 +76,19 @@ export function setConsentState(state: ConsentState): void {
   window.__lastConsentState = state;
   window.dataLayer = window.dataLayer || [];
 
-  // ✅ Safe gtag
-  const gtag =
-    window.gtag ||
-    function () {
-      window.dataLayer.push(arguments);
-    };
-
-  // 🔥 CRITICAL — Vendor-level control
-  gtag('consent', 'update', {
+  // 🔥 Consent update (Google layer)
+  window.gtag('consent', 'update', {
     analytics_storage: parsed.analytics ? 'granted' : 'denied',
     ad_storage: parsed.ads ? 'granted' : 'denied',
   });
 
-  // G event
+  // ✅ DSG visibility event (correct)
   window.dataLayer.push({
     event: 'consent_update',
     consent_state: state,
   });
 
-  // 🔹 Core consent controls queue
+  // 🔹 Queue control
   if (state === 'granted') {
     flushQueue();
 
@@ -104,6 +96,7 @@ export function setConsentState(state: ConsentState): void {
       event: 'consent_granted',
     });
 
+    // 🔥 ONLY ONE page_view (correct place)
     if (!window.__pageViewFired) {
       window.__pageViewFired = true;
 
@@ -115,6 +108,10 @@ export function setConsentState(state: ConsentState): void {
       window.dataLayer.push({
         event: 'page_view',
         ...data,
+
+        // 🔥 GTM SIGNAL (ONLY HERE)
+        ad_storage: parsed.ads ? 'granted' : 'denied',
+        analytics_storage: parsed.analytics ? 'granted' : 'denied',
       });
     }
   }
@@ -179,7 +176,7 @@ export function buildMichviData(
       traffic_source: 'direct',
       consent_status: 'denied',
       page_load_type: 'unknown',
-      script_version: 'v2.1.1',
+      script_version: 'v2.2.0',
     };
   }
 
@@ -205,7 +202,7 @@ export function buildMichviData(
     traffic_source: trafficSource,
     consent_status: getConsentState(),
     page_load_type: loadType,
-    script_version: 'v2.1.1',
+    script_version: 'v2.2.0',
   };
 }
 
