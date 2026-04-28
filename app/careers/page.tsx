@@ -20,6 +20,11 @@ export const metadata: Metadata = {
       "Apply for roles aligned with digital governance, signal integrity, and system-level advisory.",
     url: "https://michvi.com/careers/",
   },
+
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 /* ========================= */
