@@ -47,11 +47,11 @@ export function getConsentState(): ConsentState {
   }
 }
 
-export function setConsentState(state: ConsentState): void {
+export function setConsentState(state: { analytics: boolean; ads: boolean }): void {
   if (typeof window === 'undefined') return;
 
   try {
-    localStorage.setItem('michvi_consent', state);
+    localStorage.setItem('michvi_consent', JSON.stringify(state));
   } catch {}
 
   window.__lastConsentState = state;
@@ -67,8 +67,8 @@ export function setConsentState(state: ConsentState): void {
 
   // 🔥 CONSENT UPDATE (CORE)
   gtag('consent', 'update', {
-    analytics_storage: state === 'granted' ? 'granted' : 'denied',
-    ad_storage: state === 'granted' ? 'granted' : 'denied',
+    analytics_storage: state.analytics ? 'granted' : 'denied',
+    ad_storage: state.ads ? 'granted' : 'denied',
   });
 
   // DSG visibility event (keep)

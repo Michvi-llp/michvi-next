@@ -63,9 +63,7 @@ export function ConsentBanner() {
   }, []);
 
   function apply(state: LocalConsent) {
-    const resolved = state.analytics || state.ads ? "granted" : "denied";
-
-    setConsentState(resolved);
+    setConsentState(state);
 
     try {
       localStorage.setItem("consent_state", JSON.stringify(state));
