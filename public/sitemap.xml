@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- CORE -->
+  <url><loc>https://michvi.com/</loc></url>
+  <url><loc>https://michvi.com/about/</loc></url>
+  <url><loc>https://michvi.com/how-we-work/</loc></url>
+  <url><loc>https://michvi.com/digital-governance-assessment/</loc></url>
+
+  <!-- AUTHORITY LAYER -->
+  <url><loc>https://michvi.com/governance-insights/</loc></url>
+  <url><loc>https://michvi.com/governance-insights/signal-generation-governance/</loc></url>
+  <url><loc>https://michvi.com/governance-insights/platform-defaults-governance/</loc></url>
+  <url><loc>https://michvi.com/governance-insights/measurement-architecture-governance/</loc></url>
+  <url><loc>https://michvi.com/governance-insights/identity-continuity-digital-systems/</loc></url>
+  <url><loc>https://michvi.com/governance-insights/design-time-governance-ai-systems/</loc></url>
+  <url><loc>https://michvi.com/governance-insights/consent-architecture-vs-consent-interfaces/</loc></url>
+  <url><loc>https://michvi.com/governance-insights/automation-governance-architecture/</loc></url>
+  <url><loc>https://michvi.com/governance-insights/architecture-as-accountability-infrastructure/</loc></url>
+
+  <!-- SUPPORTING -->
+  <url><loc>https://michvi.com/digital-governance-architecture/</loc></url>
+  <url><loc>https://michvi.com/design-time-governance/</loc></url>
+  <url><loc>https://michvi.com/governance-model/</loc></url>
+  <url><loc>https://michvi.com/governance-case-abstracts/</loc></url>
+
+</urlset>
