@@ -138,6 +138,7 @@ function pushEventDirect(evt: DataLayerEvent): void {
     ad_storage: detail.ads ? "granted" : "denied",
   });
 
+  window.__journey = window.__journey || [];
   window.__journey.push(evt.event);
 }
 

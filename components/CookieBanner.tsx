@@ -274,3 +274,145 @@ function Toggle({
     </label>
   );
 }
+const shellOuter: React.CSSProperties = {
+  position: "fixed",
+  bottom: 0,
+  left: 0,
+  right: 0,
+  zIndex: 9999,
+  display: "flex",
+  justifyContent: "center",
+  padding: "16px",
+  pointerEvents: "none",
+  boxSizing: "border-box",
+};
+
+const shellInner: React.CSSProperties = {
+  width: "100%",
+  maxWidth: "920px",
+  maxHeight: "calc(100vh - 32px)",
+  overflowY: "auto",
+  background: "#0f172a",
+  color: "#fff",
+  borderRadius: "14px",
+  border: "1px solid rgba(255,255,255,0.08)",
+  boxShadow: "0 16px 32px rgba(0,0,0,0.25)",
+  padding: "20px",
+  pointerEvents: "auto",
+  boxSizing: "border-box",
+};
+
+const headerRow: React.CSSProperties = {
+  display: "flex",
+  alignItems: "flex-start",
+  gap: "12px",
+  marginBottom: "16px",
+};
+
+const logoSlot: React.CSSProperties = {
+  flex: "0 0 auto",
+  width: "36px",
+  height: "36px",
+  borderRadius: "8px",
+  background: "rgba(255,255,255,0.06)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  overflow: "hidden",
+};
+
+const titleStyle: React.CSSProperties = {
+  margin: 0,
+  fontSize: "16px",
+  fontWeight: 600,
+};
+
+const subtitleStyle: React.CSSProperties = {
+  margin: "6px 0 0",
+  fontSize: "13px",
+  lineHeight: 1.55,
+  color: "rgba(255,255,255,0.72)",
+};
+
+const cardGrid: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))",
+  gap: "10px",
+  marginBottom: "14px",
+};
+
+const card: React.CSSProperties = {
+  padding: "12px",
+  borderRadius: "10px",
+  background: "rgba(255,255,255,0.04)",
+  border: "1px solid rgba(255,255,255,0.06)",
+};
+
+const cardTitle: React.CSSProperties = {
+  fontSize: "13px",
+  fontWeight: 600,
+};
+
+const cardDesc: React.CSSProperties = {
+  fontSize: "12px",
+  color: "rgba(255,255,255,0.7)",
+  marginTop: "4px",
+  lineHeight: 1.5,
+};
+
+const btnRow: React.CSSProperties = {
+  display: "flex",
+  gap: "10px",
+  flexWrap: "wrap",
+};
+
+const prefsList: React.CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "8px",
+  marginBottom: "14px",
+};
+
+const row: React.CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  gap: "10px",
+  fontSize: "13px",
+  background: "rgba(255,255,255,0.04)",
+  padding: "10px 12px",
+  borderRadius: "8px",
+};
+
+const primaryBtn: React.CSSProperties = {
+  background: "#fff",
+  color: "#0f172a",
+  borderRadius: "8px",
+  padding: "9px 16px",
+  fontSize: "12px",
+  fontWeight: 600,
+  border: "none",
+  cursor: "pointer",
+};
+
+const secondaryBtn: React.CSSProperties = {
+  background: "transparent",
+  color: "#fff",
+  border: "1px solid rgba(255,255,255,0.25)",
+  borderRadius: "8px",
+  padding: "9px 16px",
+  fontSize: "12px",
+  fontWeight: 600,
+  cursor: "pointer",
+};
+
+const ghostBtn: React.CSSProperties = {
+  background: "rgba(255,255,255,0.05)",
+  color: "#fff",
+  borderRadius: "8px",
+  padding: "9px 16px",
+  fontSize: "12px",
+  fontWeight: 500,
+  border: "none",
+  cursor: "pointer",
+};
