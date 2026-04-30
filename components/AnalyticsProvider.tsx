@@ -230,6 +230,7 @@ export function AnalyticsProvider() {
     }
 
     function handleVisibilityChange() {
+      if (!hasConsent()) return;
       if (document.visibilityState === "hidden") {
         fireExit();
       }
