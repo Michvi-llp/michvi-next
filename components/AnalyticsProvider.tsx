@@ -62,6 +62,7 @@ export function AnalyticsProvider() {
   /* ================= CLICK ================= */
   useEffect(() => {
     function handleClick(e: MouseEvent) {
+      if (!hasConsent()) return; // 🔥 ADD BACK
       if (e.defaultPrevented || e.button !== 0) return;
 
       const target = e.target as HTMLElement | null;
@@ -152,7 +153,7 @@ export function AnalyticsProvider() {
 
     function processScroll() {
       rafRef.current = null;
-
+      if (!hasConsent()) return; // 🔥 ADD BACK
       if (document.visibilityState !== "visible") return;
 
       const percent = getScrollPercent();
@@ -195,6 +196,7 @@ export function AnalyticsProvider() {
 
     function schedule(delay: number, eventName: string) {
       const timer = setTimeout(() => {
+        if (!hasConsent()) return; // 🔥 ADD BACK
         if (document.visibilityState !== "visible") return;
 
         pushEvent({
@@ -220,6 +222,8 @@ export function AnalyticsProvider() {
 
     function fireExit() {
       if (exitFiredRef.current) return;
+      if (!hasConsent()) return; // 🔥 MUST ADD
+
 
       exitFiredRef.current = true;
 
@@ -230,6 +234,7 @@ export function AnalyticsProvider() {
     }
 
     function handleVisibilityChange() {
+      if (!hasConsent()) return;
       if (document.visibilityState === "hidden") {
         fireExit();
       }

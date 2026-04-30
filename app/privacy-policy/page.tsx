@@ -29,10 +29,14 @@ export default function PrivacyPolicyPage() {
       <section className="section center">
         <div className="container narrow">
 
-          <h1 className="hero-title">Privacy Policy</h1>
+          <h1 className="section-title">Privacy Policy</h1>
 
-          <p className="hero-sub">
+          <p className="section-intro">
             Michvi LLP operates with a governance-first approach to digital systems. This policy outlines how information is handled across our website, analytics systems, and advisory engagements.
+          </p>
+
+          <p className="muted small" style={{ marginTop: "12px" }}>
+            This policy reflects a governance-first operating model. Michvi LLP does not process personal data beyond limited website interaction signals and direct communication inputs.
           </p>
 
         </div>
@@ -40,7 +44,7 @@ export default function PrivacyPolicyPage() {
 
       {/* ================= CONTENT ================= */}
       <section className="section">
-        <div className="container article-wrap">
+        <div className="container narrow article-wrap">
 
           <h2>1. Operating Model</h2>
           <p>
@@ -65,6 +69,9 @@ export default function PrivacyPolicyPage() {
           </p>
           <p>
             These technologies operate strictly under user consent and are configured to avoid the collection of sensitive or personally identifiable information.
+          </p>
+          <p>
+            Analytics configurations are designed to minimize data collection, restrict data retention, and prevent the transmission of personally identifiable information.
           </p>
 
           <h2>4. Marketing and Tracking Technologies</h2>
@@ -97,6 +104,9 @@ export default function PrivacyPolicyPage() {
           <p>
             Findings are derived from structural evaluation and externally observable system behavior, without accessing internal systems or personal data.
           </p>
+          <p>
+            Michvi LLP does not assume responsibility for client system configurations, data practices, or operational decisions. Advisory outputs are independent observations based on structural analysis.
+          </p>
 
           <h2>8. Data Retention</h2>
           <p>
@@ -123,10 +133,16 @@ export default function PrivacyPolicyPage() {
           <p>
             No non-essential tracking technologies are activated prior to user consent.
           </p>
+          <p>
+            Consent status directly governs the activation of analytics and tracking technologies at the signal level.
+          </p>
 
           <h2>12. Regulatory Alignment</h2>
           <p>
             The operating model aligns with applicable frameworks including GDPR, India’s Digital Personal Data Protection (DPDP) Act, and emerging global governance standards.
+          </p>
+          <p>
+            This policy reflects an interpretive alignment with regulatory principles and does not constitute legal certification or compliance guarantees.
           </p>
 
           <h2>13. Policy Updates</h2>

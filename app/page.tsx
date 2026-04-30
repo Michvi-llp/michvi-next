@@ -146,11 +146,14 @@ export default function HomePage() {
 
               <div className="flow-line">
                 <span>Signal Integrity</span>
-                <span>→</span>
+                <span className="arrow">→</span>
+
                 <span>Identity Continuity</span>
-                <span>→</span>
+                <span className="arrow">→</span>
+
                 <span>Consent Boundary</span>
-                <span>→</span>
+                <span className="arrow">→</span>
+
                 <span className="highlight">Governance Exposure</span>
               </div>
 
@@ -171,7 +174,8 @@ export default function HomePage() {
           </p>
 
           <p className="recognition-line">
-            Recognition. If your leadership team cannot independently verify whether governance signals correspond to governance commitments — this condition is already present.
+            Recognition. If your leadership team cannot independently verify whether
+            governance signals correspond to governance commitments — this condition is already present.
           </p>
 
         </div>
@@ -188,11 +192,8 @@ export default function HomePage() {
           </p>
 
           <p>
-            It is the structural outcome of accumulated unresolved conditions across Signal Integrity,
-          </p>
-
-          <p>
-            Identity Continuity, and Consent Boundary.
+            It is the structural outcome of accumulated unresolved conditions across
+            Signal Integrity, Identity Continuity, and Consent Boundary.
           </p>
 
           <p>
@@ -204,34 +205,7 @@ export default function HomePage() {
           </p>
 
         </div>
-        {/* ================= GOVERNANCE FLOW ================= */}
-
-        <div className="governance-flow-wrap">
-
-          <div className="divider" />
-
-          <div className="governance-flow-block">
-
-            <div className="governance-flow">
-              <span>Signal Integrity</span>
-              <span className="arrow">→</span>
-
-              <span>Identity Continuity</span>
-              <span className="arrow">→</span>
-
-              <span>Consent Boundary</span>
-              <span className="arrow">→</span>
-
-              <span className="highlight">Governance Exposure</span>
-            </div>
-
-            <p className="flow-line-note">
-              By this stage, exposure is no longer architectural — it is already under evaluation.
-            </p>
-
-          </div>
-
-        </div>
+        
       </section>
 
 
@@ -258,7 +232,7 @@ export default function HomePage() {
 
 
       {/* ================= FINAL CTA ================= */}
-      <section className="section center">
+      <section className="section">
         <div className="container narrow">
 
           <h2>Request a Governance Dialogue</h2>
