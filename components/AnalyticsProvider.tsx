@@ -38,36 +38,30 @@ export function AnalyticsProvider() {
     if (!pathname) return;
     if (!hasConsent()) return;
 
-    const timer = window.setTimeout(() => {
-      const now = Date.now();
+    const now = Date.now();
 
-      if (
-        lastPageViewRef.current.path === pathname &&
-        now - lastPageViewRef.current.time < 1200
-      ) {
-        return;
-      }
+    if (
+      lastPageViewRef.current.path === pathname &&
+      now - lastPageViewRef.current.time < 800
+    ) {
+      return;
+    }
 
-      lastPageViewRef.current = { path: pathname, time: now };
-      window.__pageViewFired = true;
+    lastPageViewRef.current = { path: pathname, time: now };
 
-      pushEvent({
-        event: "page_view",
-        ...getContext(pathname),
-      });
+    pushEvent({
+      event: "page_view",
+      ...getContext(pathname),
+    });
 
-      scrollMarksRef.current = [];
-      exitFiredRef.current = false;
-      clearTimers();
-    }, 0);
-
-    return () => window.clearTimeout(timer);
+    scrollMarksRef.current = [];
+    exitFiredRef.current = false;
+    clearTimers();
   }, [pathname]);
 
   /* ================= CLICK ================= */
   useEffect(() => {
     function handleClick(e: MouseEvent) {
-      if (!hasConsent()) return;
       if (e.defaultPrevented || e.button !== 0) return;
 
       const target = e.target as HTMLElement | null;
@@ -159,7 +153,6 @@ export function AnalyticsProvider() {
     function processScroll() {
       rafRef.current = null;
 
-      if (!hasConsent()) return;
       if (document.visibilityState !== "visible") return;
 
       const percent = getScrollPercent();
@@ -202,7 +195,6 @@ export function AnalyticsProvider() {
 
     function schedule(delay: number, eventName: string) {
       const timer = setTimeout(() => {
-        if (!hasConsent()) return;
         if (document.visibilityState !== "visible") return;
 
         pushEvent({
@@ -228,7 +220,6 @@ export function AnalyticsProvider() {
 
     function fireExit() {
       if (exitFiredRef.current) return;
-      if (!hasConsent()) return;
 
       exitFiredRef.current = true;
 

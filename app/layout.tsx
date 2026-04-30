@@ -7,7 +7,6 @@ import { Footer } from "@/components/Footer";
 import { ConsentBanner } from "@/components/CookieBanner";
 import { AnalyticsProvider } from "@/components/AnalyticsProvider";
 import { GTMLoader } from "@/components/GTMLoader";
-import { RouteChangeTracker } from "@/components/RouteChangeTracker";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://michvi.com"),
@@ -125,7 +124,6 @@ export default function RootLayout({
       <body>
         <GTMLoader />
         <AnalyticsProvider />
-        <RouteChangeTracker />
 
         <Header />
         <main className="page-main">{children}</main>
