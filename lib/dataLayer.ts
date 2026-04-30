@@ -1,4 +1,10 @@
 // michvi dataLayer — v2.7.1 FINAL LOCKED
+if (typeof window !== "undefined") {
+  window.dataLayer ||= [];
+  window.__eventQueue ||= [];
+  window.__journey ||= [];
+}
+
 export type ConsentState = "granted" | "denied";
 
 export type ConsentDetail = {
@@ -80,6 +86,9 @@ export function setConsentState(state: ConsentState): void {
 
   const detail = getConsentDetail();
 
+  window.dataLayer ||= [];
+  window.__eventQueue ||= [];
+
   // Update Google Consent Mode
   window.gtag?.("consent", "update", {
     analytics_storage: detail.analytics ? "granted" : "denied",
@@ -101,8 +110,16 @@ export function setConsentState(state: ConsentState): void {
       consent_status: state,
     });
 
-    // 🔥 Critical: flush queued events
     flushQueue();
+
+    // 🔥 REQUIRED FIX
+    pushEvent({
+      event: "page_view",
+      ...buildMichviData(
+        window.location.pathname,
+        document.title
+      ),
+    });
   }
 }
 

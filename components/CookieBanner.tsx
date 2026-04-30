@@ -133,8 +133,6 @@ export function ConsentBanner({ logo }: { logo?: ReactNode }) {
 
     try {
       localStorage.setItem(DETAIL_KEY, JSON.stringify(state));
-      localStorage.setItem(CORE_KEY, resolved); 
-
     } catch {}
 
     setConsentState(resolved);
