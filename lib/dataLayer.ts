@@ -1,4 +1,9 @@
 // michvi dataLayer — v2.7.1 FINAL LOCKED
+if (typeof window !== "undefined") {
+  window.dataLayer ||= [];
+  window.__eventQueue ||= [];
+  window.__journey ||= [];
+}
 
 export type ConsentState = "granted" | "denied";
 
@@ -69,10 +74,9 @@ export function setConsentState(state: ConsentState): void {
   safeSet(CORE_KEY, state);
 
   const detail = getConsentDetail();
-  const previous = window.__lastConsentState;
 
-  window.__lastConsentState = state;
-  window.dataLayer = window.dataLayer || [];
+  window.dataLayer ||= [];
+  window.__eventQueue ||= [];
 
   window.gtag?.("consent", "update", {
     analytics_storage: detail.analytics ? "granted" : "denied",
@@ -81,42 +85,27 @@ export function setConsentState(state: ConsentState): void {
 
   window.dataLayer.push({
     event: "consent_update",
-    consent_state: state,
     consent_status: state,
     analytics_storage: detail.analytics ? "granted" : "denied",
     ad_storage: detail.ads ? "granted" : "denied",
   });
 
   if (state === "granted") {
-    const transitioned = previous !== "granted";
-
-    if (transitioned) {
-      window.dataLayer.push({
-        event: "consent_granted",
-        consent_status: state,
-        analytics_storage: detail.analytics ? "granted" : "denied",
-        ad_storage: detail.ads ? "granted" : "denied",
-      });
-    }
-
-    if (!window.__pageViewFired) {
-      window.__pageViewFired = true;
-
-      const data = buildMichviData(
-        window.location.pathname,
-        document.title
-      );
-
-      window.dataLayer.push({
-        event: "page_view",
-        ...data,
-        consent_status: state,
-        analytics_storage: detail.analytics ? "granted" : "denied",
-        ad_storage: detail.ads ? "granted" : "denied",
-      });
-    }
+    window.dataLayer.push({
+      event: "consent_granted",
+      consent_status: state,
+    });
 
     flushQueue();
+
+    // 🔥 REQUIRED FIX
+    pushEvent({
+      event: "page_view",
+      ...buildMichviData(
+        window.location.pathname,
+        document.title
+      ),
+    });
   }
 }
 
@@ -156,6 +145,11 @@ export function buildMichviData(
   pathname: string,
   title: string
 ): MichviData {
+
+  if (typeof window === "undefined") {
+    return {} as MichviData;
+  }
+
   const params = new URLSearchParams(window.location.search);
 
   let loadType = "unknown";

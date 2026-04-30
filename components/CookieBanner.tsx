@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import { setConsentState, getConsentState } from "@/lib/dataLayer";
+import { setConsentState } from "@/lib/dataLayer";
 
 type LocalConsent = {
   analytics: boolean;
@@ -125,12 +125,14 @@ export function ConsentBanner({ logo }: { logo?: ReactNode }) {
 
   /* ───────── APPLY ───────── */
   function apply(state: LocalConsent) {
+    // ✅ MUST be first line
+    if (typeof window === "undefined") return;
+
     const resolved: "granted" | "denied" =
       state.analytics || state.ads ? "granted" : "denied";
 
     try {
       localStorage.setItem(DETAIL_KEY, JSON.stringify(state));
-      localStorage.setItem(CORE_KEY, resolved);
     } catch {}
 
     setConsentState(resolved);
