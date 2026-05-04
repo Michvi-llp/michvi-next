@@ -213,6 +213,7 @@ export function ContactForm() {
           placeholder="Name"
           value={fields.name}
           onChange={handleChange}
+          className={errors.name ? "input-error" : ""}
         />
         {errors.name && <p className="form-error">{errors.name}</p>}
       </div>
@@ -224,6 +225,7 @@ export function ContactForm() {
           placeholder="Email"
           value={fields.email}
           onChange={handleChange}
+          className={errors.email ? "input-error" : ""}
         />
         {errors.email && <p className="form-error">{errors.email}</p>}
       </div>
@@ -235,6 +237,7 @@ export function ContactForm() {
           placeholder="Organisation"
           value={fields.organisation}
           onChange={handleChange}
+          className={errors.organisation ? "input-error" : ""}
         />
         {errors.organisation && (
           <p className="form-error">{errors.organisation}</p>
@@ -249,6 +252,7 @@ export function ContactForm() {
           value={fields.message}
           onChange={handleChange}
           rows={6}
+          className={errors.message ? "input-error" : ""}
         />
         {errors.message && <p className="form-error">{errors.message}</p>}
       </div>
@@ -262,6 +266,7 @@ export function ContactForm() {
         }}
       >
         <label
+          className={errors.consent_ack ? "label-error" : ""}
           style={{
             display: "inline-flex",
             alignItems: "center",
@@ -271,7 +276,7 @@ export function ContactForm() {
             letterSpacing: "0.12em",
             textTransform: "uppercase",
             color: "var(--ink-tertiary)",
-            whiteSpace: "nowrap", // 🔥 KEY FIX
+            whiteSpace: "nowrap",
           }}
         >
           <input

@@ -245,7 +245,7 @@ export default function DigitalGovernanceAssessmentPage() {
       >
         <div className="container">
 
-          <h2 className="section-title">
+          <h2 className="cta-title">
             Initiate Confidential Governance Assessment
           </h2>
 

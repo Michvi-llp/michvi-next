@@ -158,17 +158,24 @@ export function AnalyticsProvider() {
       const percent = getScrollPercent();
       const context = getContext(pathname);
 
-      SCROLL_MARKS.forEach((mark) => {
-        if (percent >= mark && !scrollMarksRef.current.includes(mark)) {
-          scrollMarksRef.current.push(mark);
+      // get highest threshold reached
+      const maxReached = Math.max(
+        ...SCROLL_MARKS.filter((mark) => percent >= mark),
+        0
+      );
 
-          pushEvent({
-            event: "scroll_depth",
-            ...context,
-            scroll_percentage: mark,
-          });
-        }
-      });
+      if (
+        maxReached > 0 &&
+        !scrollMarksRef.current.includes(maxReached)
+      ) {
+        scrollMarksRef.current.push(maxReached);
+
+        pushEvent({
+          event: "scroll_depth",
+          ...context,
+          scroll_percentage: maxReached,
+        });
+      }
     }
 
     function handleScroll() {
@@ -193,25 +200,62 @@ export function AnalyticsProvider() {
 
     clearTimers();
 
-    function schedule(delay: number, eventName: string) {
-      const timer = setTimeout(() => {
-        if (document.visibilityState !== "visible") return;
+    let activeTime = 0;
+    let lastTick = Date.now();
 
-        pushEvent({
-          event: eventName,
-          ...getContext(pathname),
-        });
-      }, delay);
+    let fired30 = false;
+    let fired60 = false;
 
-      timersRef.current.push(timer);
+    function isActive() {
+      return document.visibilityState === "visible";
     }
 
-    schedule(30000, "engaged_30s");
-    schedule(60000, "engaged_60s");
+    function tick() {
+      const now = Date.now();
 
-    return clearTimers;
+      if (isActive()) {
+        activeTime += now - lastTick;
+      }
+
+      lastTick = now;
+
+      const context = getContext(pathname);
+
+      if (activeTime >= 30000 && !fired30) {
+        fired30 = true;
+
+        pushEvent({
+          event: "engaged_30s",
+          ...context,
+        });
+      }
+
+      if (activeTime >= 60000 && !fired60) {
+        fired60 = true;
+
+        pushEvent({
+          event: "engaged_60s",
+          ...context,
+        });
+      }
+    }
+
+    // 🔥 INTERVAL
+    const interval = setInterval(tick, 1000);
+
+    // 🔥 VISIBILITY FIX (ADD HERE)
+    function handleVisibilityChange() {
+      lastTick = Date.now();
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      clearTimers();
+    };
   }, [pathname]);
-
   /* ================= PAGE EXIT ================= */
   useEffect(() => {
     if (!pathname) return;

@@ -30,7 +30,8 @@ export function Footer() {
             {/* ✅ SINGLE CTA ONLY */}
             <div className="footer-cta">
               <Link href="/request-assessment">
-                Request a Governance Dialogue →
+                <span>Request a Governance Dialogue</span>
+                <span className="arrow">→</span>
               </Link>
             </div>
           </div>

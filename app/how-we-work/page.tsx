@@ -231,7 +231,7 @@ export default function HowWeWorkPage() {
       <section className="hero-dark center">
         <div className="container narrow">
 
-          <h2 className="section-title">
+          <h2 className="cta-title">
             Initiate Confidential Governance Review
           </h2>
 
