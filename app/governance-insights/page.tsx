@@ -69,27 +69,60 @@ export default function GovernanceInsightsPage() {
         </div>
       </section>
 
-      {/* EXTERNAL */}
+      {/* ========================= */}
+      {/* FEATURED OBSERVATIONS */}
+      {/* ========================= */}
       <section className="section light-alt center">
         <div className="container narrow">
 
-          <p className="label">External Publications</p>
+          <p className="label">Featured Observations</p>
 
-          {externalPosts.map((post, i) => (
-            <div key={i} className="external-block">
-              <h2>{post.title}</h2>
-              <p>{post.desc}</p>
+          {externalPosts
+            .filter((post) => post.featured)
+            .map((post, i) => (
+              <div key={i} className="external-block">
+                <h2>{post.title}</h2>
+                <p>{post.desc}</p>
 
-              <a
-                href={post.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-link"
-              >
-                Read on Medium →
-              </a>
-            </div>
-          ))}
+                <a
+                  href={post.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-link"
+                >
+                  Read on Medium →
+                </a>
+              </div>
+            ))}
+
+        </div>
+      </section>
+
+      {/* ========================= */}
+      {/* PUBLISHED OBSERVATIONS */}
+      {/* ========================= */}
+      <section className="section center">
+        <div className="container narrow">
+
+          <p className="label">Published Observations</p>
+
+          {externalPosts
+            .filter((post) => !post.featured)
+            .map((post, i) => (
+              <div key={i} className="external-block">
+                <h2>{post.title}</h2>
+                <p>{post.desc}</p>
+
+                <a
+                  href={post.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-link"
+                >
+                  Read on Medium →
+                </a>
+              </div>
+            ))}
 
         </div>
       </section>
@@ -156,7 +189,7 @@ export default function GovernanceInsightsPage() {
       >
         <div className="container narrow">
 
-          <h2 className="section-title">
+          <h2 className="cta-title">
             Initiate Confidential Governance Review
           </h2>
 
@@ -203,6 +236,18 @@ export default function GovernanceInsightsPage() {
 /* ========================= */
 
 const externalPosts = [
+  {
+    title: "When Identity Breaks and Consent Arrives Late",
+    desc: "Signal meaning collapses when identity continuity and consent timing diverge.",
+    link: "https://medium.com/@shikharjha/when-identity-breaks-and-consent-arrives-late-signals-lose-meaning-8315f6a5dcb7",
+    featured: true,
+  },
+  {
+    title: "Signals You Never Designed Are Shaping Your Systems",
+    desc: "Undesigned signals silently define system behavior and outcomes.",
+    link: "https://medium.com/@shikharjha/signals-you-never-designed-are-shaping-your-systems-6725270f75d2",
+    featured: true,
+  },
   {
     title: "Governance Begins Before Data Exists",
     desc: "Governance begins where signals are formed.",

@@ -225,7 +225,7 @@ export default function DesignTimeGovernancePage() {
         >
           <div className="container">
 
-            <h2 className="section-title">
+            <h2 className="cta-title">
               Initiate Confidential Design-Time Governance Review
             </h2>
 

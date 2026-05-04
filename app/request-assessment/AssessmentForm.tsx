@@ -250,13 +250,17 @@ export function AssessmentForm() {
           onChange={handleChange}
           rows={6}
           placeholder="Briefly describe your system, concern, or what triggered this request (e.g. attribution gaps, consent concerns, data inconsistency, regulatory exposure)"
+          className={errors.context ? "input-error" : ""}
         />
         {errors.context && <p className="form-error">{errors.context}</p>}
       </div>
 
       {/* 🔥 CONSENT */}
       <div style={{ marginBottom: "16px" }}>
-        <label style={{ display: "flex", gap: "8px" }}>
+        <label
+          className={errors.consent_ack ? "label-error" : ""}
+          style={{ display: "flex", gap: "8px" }}
+        >
           <input
             type="checkbox"
             checked={consentChecked}
@@ -296,8 +300,17 @@ export function AssessmentForm() {
 function Field({ label, name, value, onChange, error, type = "text", autoComplete }: FieldProps) {
   return (
     <div className="form-field">
-      <label>{label}</label>
-      <input name={name} value={value} onChange={onChange} type={type} autoComplete={autoComplete} />
+      <label className={error ? "label-error" : ""}>
+        {label}
+      </label>
+      <input
+        name={name}
+        value={value}
+        onChange={onChange}
+        type={type}
+        autoComplete={autoComplete}
+        className={error ? "input-error" : ""}
+      />
       {error && <p className="form-error">{error}</p>}
     </div>
   );

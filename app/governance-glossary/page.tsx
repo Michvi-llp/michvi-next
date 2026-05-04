@@ -124,7 +124,7 @@ export default function GovernanceGlossaryPage() {
       >
         <div className="container narrow">
 
-          <h2 className="section-title">
+          <h2 className="cta-title">
             Explore Governance Conditions in Your Environment
           </h2>
 

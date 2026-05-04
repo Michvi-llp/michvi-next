@@ -197,7 +197,7 @@ export default function GovernanceCaseAbstractsPage() {
       >
         <div className="container narrow">
 
-          <h2 className="section-title">
+          <h2 className="cta-title">
             Initiate Confidential Governance Review
           </h2>
 

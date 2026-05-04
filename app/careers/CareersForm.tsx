@@ -12,6 +12,7 @@ type CareerFields = {
   role: string;
   message: string;
   website: string;
+  profile_link?: string;
 };
 
 type Errors = Partial<Record<keyof CareerFields | "consent_ack", string>>;
@@ -23,6 +24,7 @@ const initialFields: CareerFields = {
   role: "",
   message: "",
   website: "",
+  profile_link: "",
 };
 
 export function CareersForm() {
@@ -92,19 +94,24 @@ export function CareersForm() {
   function validate(): Errors {
     const e: Errors = {};
 
-    if (!fields.name.trim()) e.name = "Required";
+    const name = fields.name.trim();
+    const email = fields.email.trim();
+    const role = fields.role.trim();
+    const message = fields.message.trim();
 
-    if (!fields.email.trim()) {
+    if (!name) e.name = "Required";
+
+    if (!email) {
       e.email = "Required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email)) {
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       e.email = "Invalid email";
     }
 
-    if (!fields.role.trim()) e.role = "Required";
+    if (!role) e.role = "Required";
 
-    if (!fields.message.trim()) {
+    if (!message) {
       e.message = "Required";
-    } else if (fields.message.trim().length < 10) {
+    } else if (message.length < 10) {
       e.message = "Add more detail";
     }
 
@@ -112,7 +119,6 @@ export function CareersForm() {
 
     return e;
   }
-
   /* ================= SUBMIT ================= */
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -152,10 +158,10 @@ export function CareersForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: fields.name,
-          email: fields.email,
-          role: fields.role,
-          message: fields.message,
+          name: fields.name.trim(),
+          email: fields.email.trim(),
+          role: fields.role.trim(),
+          message: fields.message.trim(),
           form_type: "career",
           pageUrl: window.location.href,
           pageTitle: document.title,
@@ -218,16 +224,19 @@ export function CareersForm() {
             name="name"
             value={fields.name}
             onChange={handleChange}
+            className={errors.name ? "input-error" : ""}
           />
           {errors.name && <p className="form-error">{errors.name}</p>}
         </div>
 
         <div className="form-field">
           <input
+            type="email"
             placeholder="Email"
             name="email"
             value={fields.email}
             onChange={handleChange}
+            className={errors.email ? "input-error" : ""}
           />
           {errors.email && <p className="form-error">{errors.email}</p>}
         </div>
@@ -238,8 +247,18 @@ export function CareersForm() {
             name="role"
             value={fields.role}
             onChange={handleChange}
+            className={errors.role ? "input-error" : ""}
           />
           {errors.role && <p className="form-error">{errors.role}</p>}
+        </div>
+
+        <div className="form-field">
+          <input
+            placeholder="Portfolio / Resume Link (optional)"
+            name="profile_link"
+            value={(fields as any).profile_link || ""}
+            onChange={handleChange}
+          />
         </div>
       </div>
 
@@ -251,17 +270,25 @@ export function CareersForm() {
           value={fields.message}
           onChange={handleChange}
           rows={5}
+          className={errors.message ? "input-error" : ""}
         />
         {errors.message && <p className="form-error">{errors.message}</p>}
       </div>
 
       {/* CONSENT */}
       <div className="form-consent">
-        <label>
+        <label className={errors.consent_ack ? "label-error" : ""}>
           <input
             type="checkbox"
             checked={consentChecked}
-            onChange={(e) => setConsentChecked(e.target.checked)}
+            onChange={(e) => {
+              setConsentChecked(e.target.checked);
+
+              if (errors.consent_ack) {
+                setErrors((prev) => ({ ...prev, consent_ack: "" }));
+              }
+            }}
+            
           />
           <span>
             I agree to data usage as per{" "}
