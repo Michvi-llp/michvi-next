@@ -287,6 +287,8 @@ const shellOuter: React.CSSProperties = {
   padding: "16px",
   pointerEvents: "none",
   boxSizing: "border-box",
+
+  height: "auto",        // ✅ ADD HERE (NOT JSX)
 };
 
 const shellInner: React.CSSProperties = {

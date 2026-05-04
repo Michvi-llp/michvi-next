@@ -5,10 +5,11 @@ import Link from "next/link";
 export function Footer() {
   return (
     <footer className="footer">
-      <div className="container">
+      <div className="container footer-container">
+
         <div className="footer-grid">
 
-          {/* COLUMN 1 — BRAND */}
+          {/* ===== BRAND ===== */}
           <div className="footer-brand">
             <h4>MICHVI LLP</h4>
 
@@ -26,15 +27,16 @@ export function Footer() {
               Independent of marketing platforms, system vendors, and implementation partners.
             </p>
 
-            {/* CTA */}
+            {/* ✅ SINGLE CTA ONLY */}
             <div className="footer-cta">
               <Link href="/request-assessment">
-                Request a Governance Dialogue →
+                <span>Request a Governance Dialogue</span>
+                <span className="arrow">→</span>
               </Link>
             </div>
           </div>
 
-          {/* COLUMN 2 */}
+          {/* ===== FRAMEWORK ===== */}
           <div className="footer-col">
             <h4>Framework</h4>
             <ul>
@@ -44,11 +46,12 @@ export function Footer() {
               <li><Link href="/digital-governance-assessment">Digital Governance Assessment</Link></li>
               <li><Link href="/governance-insights">Governance Insights</Link></li>
               <li><Link href="/governance-case-abstracts">Governance Case Abstracts</Link></li>
+              <li><Link href="/governance-glossary">Governance Glossary</Link></li>
               <li><Link href="/how-we-work">How We Work</Link></li>
             </ul>
           </div>
 
-          {/* COLUMN 3 */}
+          {/* ===== COMPANY ===== */}
           <div className="footer-col">
             <h4>Company</h4>
             <ul>
@@ -67,19 +70,19 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* COLUMN 4 — LEGAL (FINAL GOVERNANCE STRUCTURE) */}
+          {/* ===== LEGAL ===== */}
           <div className="footer-col">
             <h4>Legal</h4>
             <ul>
 
-              {/* POLICY */}
               <li>
-                <Link href="/privacy-policy">
-                  Privacy Policy
-                </Link>
+                <Link href="/privacy-policy">Privacy Policy</Link>
               </li>
 
-              {/* CONSENT CONTROL */}
+              <li>
+                <Link href="/cookie-policy">Cookie Policy</Link>
+              </li>
+
               <li>
                 <button
                   type="button"
@@ -92,7 +95,6 @@ export function Footer() {
                 </button>
               </li>
 
-              {/* DATA RIGHTS (HUBSPOT — EXTERNAL) */}
               <li>
                 <a
                   href="https://na2.hs-data-privacy.com/request/jh63GnORcTW_9TbGps1c9Q"
@@ -103,17 +105,13 @@ export function Footer() {
                 </a>
               </li>
 
-              {/* TERMS */}
               <li>
-                <Link href="/terms-conditions">
-                  Terms of Use
-                </Link>
+                <Link href="/terms-conditions">Terms of Use</Link>
               </li>
 
-              {/* CONTACT */}
               <li>
                 <a href="mailto:advisory@michvi.com">
-                  Governance Advisory: advisory@michvi.com
+                  advisory@michvi.com
                 </a>
               </li>
 
@@ -121,10 +119,11 @@ export function Footer() {
           </div>
 
         </div>
-      </div>
 
-      <div className="footer-bottom">
-        © 2026 Michvi LLP. All rights reserved.
+        <div className="footer-bottom">
+          © 2026 Michvi LLP. All rights reserved.
+        </div>
+
       </div>
     </footer>
   );

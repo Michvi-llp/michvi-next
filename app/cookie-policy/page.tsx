@@ -6,22 +6,22 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Cookie Policy | Michvi LLP",
   description:
-    "Cookie Policy explaining how Michvi LLP uses cookies and tracking technologies in a consent-based and minimal data approach.",
+    "Cookie Policy explaining how Michvi LLP uses cookies and consent-based signal activation in a governance-first architecture.",
 
   alternates: {
-    canonical: "/cookie-policy/",
+    canonical: "https://michvi.com/cookie-policy/",
   },
 
   openGraph: {
     title: "Cookie Policy | Michvi LLP",
     description:
-      "Consent-based cookie usage and tracking transparency for Michvi LLP.",
+      "Consent-based signal activation and minimal data usage at Michvi LLP.",
     url: "https://michvi.com/cookie-policy/",
   },
 
   robots: {
-    index: false,
-    follow: false,
+    index: true,
+    follow: true,
   },
 };
 
@@ -39,11 +39,11 @@ export default function CookiePolicyPage() {
           <h1 className="hero-title">Cookie Policy</h1>
 
           <p className="hero-sub">
-            This policy explains how Michvi LLP uses cookies and tracking technologies in a consent-based and minimal data approach.
+            This policy explains how Michvi LLP uses cookies and signal-based tracking in a consent-controlled and governance-first manner.
           </p>
 
           <p className="hero-micro">
-            Consent-driven · Minimal data collection · Governance-first tracking
+            Consent-driven · Minimal data · Structural governance
           </p>
 
         </div>
@@ -55,12 +55,12 @@ export default function CookiePolicyPage() {
 
           <h2>1. What Are Cookies</h2>
           <p>
-            Cookies are small text files stored on your device that help websites function and understand how users interact with content.
+            Cookies are small text files stored on your device that enable websites to function and understand high-level interaction patterns.
           </p>
 
           <h2>2. How We Use Cookies</h2>
           <p>
-            Michvi uses cookies in a limited and controlled manner to understand high-level engagement and improve website clarity.
+            Michvi LLP uses cookies in a limited and controlled manner to support essential functionality and understand aggregated engagement patterns.
           </p>
 
           <p>These may include:</p>
@@ -74,56 +74,73 @@ export default function CookiePolicyPage() {
 
           <h3>Essential Cookies</h3>
           <p>
-            Required for basic website functionality, including session continuity and security.
+            Required for core functionality, including session continuity and system stability. These operate by default.
           </p>
 
           <h3>Analytics Cookies</h3>
           <p>
-            Used to understand how visitors interact with the website in an aggregated and non-sensitive manner.
+            Used to understand interaction patterns in an aggregated and non-sensitive manner.
           </p>
 
-          <h3>Marketing / Measurement Cookies</h3>
+          <h3>Communication / Measurement Cookies</h3>
           <p>
-            Used in a limited manner to measure communication effectiveness. These operate only based on user consent.
+            Used in a limited manner to evaluate communication effectiveness. These operate only after user consent.
           </p>
 
-          <h2>4. Consent-Based Operation</h2>
+          <h2>4. Consent-Based Signal Activation</h2>
           <p>
-            Non-essential cookies are activated only after user consent is provided through the cookie banner.
+            Non-essential cookies and signals are not activated at page load.
           </p>
 
           <p>
-            Users may accept or decline cookie usage, and preferences can be updated at any time through browser settings.
+            Events associated with analytics and communication are held in a temporary queue and are only activated after explicit user consent is provided.
+          </p>
+
+          <p>
+            This ensures that no non-essential data is transmitted before consent is established.
+          </p>
+
+          <p>
+            Users can grant, deny, or modify consent preferences at any time through the on-site consent manager.
           </p>
 
           <h2>5. Third-Party Technologies</h2>
           <p>
-            The website may use selected third-party tools for analytics and communication purposes.
+            The website uses limited third-party technologies (such as analytics and communication platforms) under a consent-controlled configuration.
           </p>
 
           <p>
-            These tools operate under their own privacy frameworks and are configured to limit data collection to necessary and non-sensitive information.
+            These technologies operate within their respective frameworks and are configured to limit data collection to necessary and non-sensitive signals.
           </p>
 
           <h2>6. Data Minimization Approach</h2>
           <p>
-            Michvi follows a governance-first approach emphasizing minimal data collection, limited retention, and controlled signal usage.
+            Michvi follows a governance-first approach emphasizing minimal data collection, limited retention, and controlled signal activation.
+          </p>
+
+          <p>
+            Signals are structured to prioritize system integrity and accountability over volume or tracking depth.
           </p>
 
           <h2>7. Managing Cookies</h2>
           <p>
-            Users can control or disable cookies through browser settings. Disabling certain cookies may impact website functionality.
+            Users can manage cookie preferences directly through the consent manager available on this website.
+          </p>
+
+          <p>
+            Additionally, browser-level controls may be used to restrict or delete cookies, though this may impact certain functionality.
           </p>
 
           <h2>8. Updates</h2>
           <p>
-            This policy may be updated periodically to reflect changes in technologies or regulatory expectations.
+            This policy may be updated periodically to reflect changes in technology, governance practices, or regulatory expectations.
           </p>
 
           <h2>9. Contact</h2>
           <p>
             <strong>Michvi LLP</strong><br />
-            Email: advisory@michvi.com
+            Governance Advisory<br />
+            advisory@michvi.com
           </p>
 
           <p className="muted" style={{ marginTop: "40px" }}>

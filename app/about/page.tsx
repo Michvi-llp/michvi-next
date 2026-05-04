@@ -295,7 +295,7 @@ export default function AboutPage() {
             </p>
 
             <Link href="/request-assessment/" className="btn-primary">
-              Initiate Governance Assessment
+              Request a Governance Dialogue
             </Link>
 
             <p className="hero-note">
