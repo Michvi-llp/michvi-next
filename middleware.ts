@@ -16,5 +16,14 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: "/:path*",
+  matcher: [
+    /*
+     * Apply only to actual pages
+     * Exclude:
+     * - _next (assets)
+     * - api
+     * - vercel internals
+     */
+    "/((?!_next|api|.*\\..*).*)",
+  ],
 };
