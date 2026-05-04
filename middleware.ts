@@ -5,6 +5,10 @@ export function middleware(request: NextRequest) {
   const response = NextResponse.next();
   const host = request.headers.get("host") || "";
 
+  // ✅ Allow Vercel preview iframe
+  response.headers.set("X-Frame-Options", "ALLOWALL");
+
+  // ✅ Staging no-index protection
   if (host.includes("stg.michvi.com")) {
     response.headers.set(
       "X-Robots-Tag",
@@ -16,5 +20,8 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: "/:path*",
+  matcher: [
+    // ✅ Apply only to pages (avoid breaking Vercel internals)
+    "/((?!_next|api|.*\\..*).*)",
+  ],
 };
