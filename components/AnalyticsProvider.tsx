@@ -223,7 +223,6 @@ export function AnalyticsProvider() {
 
       if (activeTime >= 30000 && !fired30) {
         fired30 = true;
-
         pushEvent({
           event: "engaged_30s",
           ...context,
@@ -232,7 +231,6 @@ export function AnalyticsProvider() {
 
       if (activeTime >= 60000 && !fired60) {
         fired60 = true;
-
         pushEvent({
           event: "engaged_60s",
           ...context,
@@ -254,7 +252,6 @@ export function AnalyticsProvider() {
       clearTimers();
     };
   }, [pathname]);
-
   /* ================= PAGE EXIT ================= */
   useEffect(() => {
     if (!pathname) return;
