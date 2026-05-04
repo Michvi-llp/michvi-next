@@ -240,10 +240,8 @@ export function AnalyticsProvider() {
       }
     }
 
-    // 🔥 INTERVAL
     const interval = setInterval(tick, 1000);
 
-    // 🔥 VISIBILITY FIX (ADD HERE)
     function handleVisibilityChange() {
       lastTick = Date.now();
     }
@@ -256,38 +254,3 @@ export function AnalyticsProvider() {
       clearTimers();
     };
   }, [pathname]);
-  /* ================= PAGE EXIT ================= */
-  useEffect(() => {
-    if (!pathname) return;
-
-    exitFiredRef.current = false;
-
-    function fireExit() {
-      if (exitFiredRef.current) return;
-
-      exitFiredRef.current = true;
-
-      pushEvent({
-        event: "page_exit",
-        ...getContext(pathname),
-      });
-    }
-
-    function handleVisibilityChange() {
-      if (!hasConsent()) return;
-      if (document.visibilityState === "hidden") {
-        fireExit();
-      }
-    }
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("pagehide", fireExit);
-
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("pagehide", fireExit);
-    };
-  }, [pathname]);
-
-  return null;
-}
